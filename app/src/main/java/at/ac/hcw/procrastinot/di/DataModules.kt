@@ -16,9 +16,12 @@
 
 package at.ac.hcw.procrastinot.di
 
+import android.content.ContentValues
 import android.content.Context
+import androidx.room.OnConflictStrategy
 import androidx.room.Room
 import androidx.room.migration.Migration
+import androidx.room.RoomDatabase
 import androidx.sqlite.db.SupportSQLiteDatabase
 import at.ac.hcw.procrastinot.data.DefaultTaskRepository
 import at.ac.hcw.procrastinot.data.TaskRepository
@@ -32,6 +35,7 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import java.util.UUID
 import javax.inject.Singleton
 
 @Module
@@ -73,7 +77,37 @@ object DatabaseModule {
             "Tasks.db"
         )
         .addMigrations(MIGRATION_1_2)
-        .build()
+        ).addCallback(object : RoomDatabase.Callback() {
+            override fun onCreate(db: SupportSQLiteDatabase) {
+                super.onCreate(db)
+                // === MAD-04.01: Datenbank-Seeding beim ersten Start ===
+                // Wir fügen initiale Tasks hinzu, damit der User beim ersten Öffnen der App
+                // bereits Beispieldaten sieht.
+                seedDatabase(db)
+            }
+        }).build()
+    }
+
+    /**
+     * === MAD-04.02: Hilfsfunktion zum Einfügen von Initialdaten ===
+     * Nutzt SupportSQLiteDatabase, um direkt SQL-Inserts auszuführen.
+     */
+    private fun seedDatabase(db: SupportSQLiteDatabase) {
+        val initialTasks = listOf(
+            Triple("Finish the Android App", "Complete all MAD practical tasks", false),
+            Triple("Prepare for Presentation", "Create slides for the final presentation", true),
+            Triple("Read the documentation", "Review the Android developer guides", false)
+        )
+
+        initialTasks.forEach { (title, description, isCompleted) ->
+            val values = ContentValues().apply {
+                put("id", UUID.randomUUID().toString())
+                put("title", title)
+                put("description", description)
+                put("isCompleted", if (isCompleted) 1 else 0)
+            }
+            db.insert("task", OnConflictStrategy.IGNORE, values)
+        }
     }
 
     @Provides

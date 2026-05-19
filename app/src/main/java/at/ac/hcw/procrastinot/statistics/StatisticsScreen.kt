@@ -17,10 +17,16 @@
 package at.ac.hcw.procrastinot.statistics
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -29,10 +35,15 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import at.ac.hcw.procrastinot.R
@@ -93,15 +104,64 @@ private fun StatisticsContent(
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = dimensionResource(id = R.dimen.horizontal_margin))
         ) {
+            // === MAD-05.01: UI-Update für die Statistik-Karten ===
+            // Wir ersetzen die einfache Textanzeige durch farbige Karten (Orange für Aktiv, Grün für Erledigt)
+            // gemäß dem neuen Design-Mockup.
             if (!loading) {
-                Text(stringResource(id = R.string.statistics_active_tasks, activeTasksPercent))
-                Text(
-                    stringResource(
-                        id = R.string.statistics_completed_tasks,
-                        completedTasksPercent
-                    )
+                Spacer(modifier = Modifier.height(dimensionResource(id = R.dimen.vertical_margin)))
+
+                StatsCard(
+                    title = stringResource(id = R.string.label_active),
+                    percentage = activeTasksPercent,
+                    containerColor = Color(0xFFFF9800) // Orange
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                StatsCard(
+                    title = stringResource(id = R.string.label_completed),
+                    percentage = completedTasksPercent,
+                    containerColor = Color(0xFF4CAF50) // Green
                 )
             }
+        }
+    }
+}
+
+/**
+ * === MAD-05.02: Hilfs-Composable für Statistik-Karten ===
+ * Erstellt eine abgerundete Karte mit Titel und Prozentwert.
+ */
+@Composable
+private fun StatsCard(
+    title: String,
+    percentage: Float,
+    containerColor: Color
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = containerColor),
+        shape = MaterialTheme.shapes.medium
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.bodyMedium,
+                color = Color.Black
+            )
+            Text(
+                text = "${"%.1f".format(percentage)}%",
+                style = MaterialTheme.typography.headlineMedium.copy(
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 32.sp
+                ),
+                color = Color.Black
+            )
         }
     }
 }
