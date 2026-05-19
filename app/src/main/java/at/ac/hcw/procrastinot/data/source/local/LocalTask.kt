@@ -34,5 +34,8 @@ data class LocalTask(
     var title: String,
     var description: String,
     var isCompleted: Boolean,
+    // === MAD-02.3: Add priority to LocalTask ===
+    // Hinzufügen der Priorität im Entity für die lokale Datenbank als Int, um TypeConverters zu vermeiden.
+    var priority: Int? = null,
 )
 

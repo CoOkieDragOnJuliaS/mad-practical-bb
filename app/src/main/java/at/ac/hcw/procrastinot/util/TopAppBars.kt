@@ -56,6 +56,11 @@ fun TasksTopAppBar(
     onFilterAllTasks: () -> Unit,
     onFilterActiveTasks: () -> Unit,
     onFilterCompletedTasks: () -> Unit,
+    // === MAD-02.16: Update TasksTopAppBar for Priority Filters ===
+    // Priority Filters im Filter Menu der Toolbar hinzufügen
+    onFilterHighPriorityTasks: () -> Unit,
+    onFilterMediumPriorityTasks: () -> Unit,
+    onFilterLowPriorityTasks: () -> Unit,
     onClearCompletedTasks: () -> Unit,
     onRefresh: () -> Unit
 ) {
@@ -67,7 +72,14 @@ fun TasksTopAppBar(
             }
         },
         actions = {
-            FilterTasksMenu(onFilterAllTasks, onFilterActiveTasks, onFilterCompletedTasks)
+            FilterTasksMenu(
+                onFilterAllTasks,
+                onFilterActiveTasks,
+                onFilterCompletedTasks,
+                onFilterHighPriorityTasks,
+                onFilterMediumPriorityTasks,
+                onFilterLowPriorityTasks
+            )
             MoreTasksMenu(onClearCompletedTasks, onRefresh)
         },
         modifier = Modifier.fillMaxWidth()
@@ -78,7 +90,10 @@ fun TasksTopAppBar(
 private fun FilterTasksMenu(
     onFilterAllTasks: () -> Unit,
     onFilterActiveTasks: () -> Unit,
-    onFilterCompletedTasks: () -> Unit
+    onFilterCompletedTasks: () -> Unit,
+    onFilterHighPriorityTasks: () -> Unit,
+    onFilterMediumPriorityTasks: () -> Unit,
+    onFilterLowPriorityTasks: () -> Unit
 ) {
     TopAppBarDropdownMenu(
         iconContent = {
@@ -96,6 +111,15 @@ private fun FilterTasksMenu(
         )
         DropdownMenuItem(onClick = { onFilterCompletedTasks(); closeMenu() },
             text = { Text(text = stringResource(id = R.string.nav_completed)) }
+        )
+        DropdownMenuItem(onClick = { onFilterHighPriorityTasks(); closeMenu() },
+            text = { Text(text = stringResource(id = R.string.nav_high_priority)) }
+        )
+        DropdownMenuItem(onClick = { onFilterMediumPriorityTasks(); closeMenu() },
+            text = { Text(text = stringResource(id = R.string.nav_medium_priority)) }
+        )
+        DropdownMenuItem(onClick = { onFilterLowPriorityTasks(); closeMenu() },
+            text = { Text(text = stringResource(id = R.string.nav_low_priority)) }
         )
     }
 }
@@ -193,7 +217,9 @@ fun AddEditTaskTopAppBar(@StringRes title: Int, onBack: () -> Unit) {
 private fun TasksTopAppBarPreview() {
     TodoTheme {
         Surface {
-            TasksTopAppBar({}, {}, {}, {}, {}, {})
+            // === MAD-02.18: Fix TopAppBar Preview ===
+            // Hinzufügen der fehlenden Lambda-Parameter für die neuen Filter-Optionen (High, Medium, Low)
+            TasksTopAppBar({}, {}, {}, {}, {}, {}, {}, {}, {})
         }
     }
 }

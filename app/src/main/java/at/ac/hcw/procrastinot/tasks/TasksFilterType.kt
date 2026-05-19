@@ -33,6 +33,11 @@ enum class TasksFilterType {
     /**
      * Filters only the completed tasks.
      */
-    COMPLETED_TASKS
+    COMPLETED_TASKS,
+
+    // === MAD-02.11: Update Task filters ===
+    HIGH_PRIORITY_TASKS,
+    MEDIUM_PRIORITY_TASKS,
+    LOW_PRIORITY_TASKS
 }
 

@@ -64,10 +64,13 @@ class DefaultTaskRepository @Inject constructor(
         return taskId
     }
 
-    override suspend fun updateTask(taskId: String, title: String, description: String) {
+    // === MAD-02.9: Update DefaultTaskRepository with priority ===
+    // updateTask Methode implementiert, um Priority zu speichern
+    override suspend fun updateTask(taskId: String, title: String, description: String, priority: TaskPriority?) {
         val task = getTask(taskId)?.copy(
             title = title,
-            description = description
+            description = description,
+            priority = priority
         ) ?: throw Exception("Task (id $taskId) not found")
 
         localDataSource.upsert(task.toLocal())
@@ -110,6 +113,18 @@ class DefaultTaskRepository @Inject constructor(
             refresh()
         }
         return localDataSource.getById(taskId)?.toExternal()
+    }
+
+    // === MAD-01.2: Implement complete/activate task in DefaultTaskRepository ===
+    // Implementierung der Methoden, um isCompleted via localDataSource zu aktualisieren und ins Netzwerk zu synchronisieren.
+    override suspend fun completeTask(taskId: String) {
+        localDataSource.updateCompleted(taskId, true)
+        saveTasksToNetwork()
+    }
+
+    override suspend fun activateTask(taskId: String) {
+        localDataSource.updateCompleted(taskId, false)
+        saveTasksToNetwork()
     }
 
     override suspend fun clearCompletedTasks() {

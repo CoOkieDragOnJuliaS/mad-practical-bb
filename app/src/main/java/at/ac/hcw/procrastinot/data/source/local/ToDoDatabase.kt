@@ -24,7 +24,9 @@ import androidx.room.RoomDatabase
  *
  * Note that exportSchema should be true in production databases.
  */
-@Database(entities = [LocalTask::class], version = 1, exportSchema = false)
+// === MAD-02.5: Database migration ===
+// Room Datenbank von Version 1 auf 2 aktualisiert, da Priority zur LocalTask Entity hinzugefügt wurde.
+@Database(entities = [LocalTask::class], version = 2, exportSchema = false)
 abstract class ToDoDatabase : RoomDatabase() {
 
     abstract fun taskDao(): TaskDao

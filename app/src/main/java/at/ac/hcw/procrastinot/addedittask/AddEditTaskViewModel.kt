@@ -30,12 +30,17 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+import at.ac.hcw.procrastinot.data.TaskPriority
+
 /**
  * UiState for the Add/Edit screen
  */
+// === MAD-02.7: Update AddEditTaskUiState ===
+// Hinzufügen der Priorität zum State für die Add/Edit Ansicht
 data class AddEditTaskUiState(
     val title: String = "",
     val description: String = "",
+    val priority: TaskPriority? = null,
     val isTaskCompleted: Boolean = false,
     val isLoading: Boolean = false,
     val userMessage: Int? = null,
@@ -99,8 +104,15 @@ class AddEditTaskViewModel @Inject constructor(
         }
     }
 
+    fun updatePriority(newPriority: TaskPriority?) {
+        _uiState.update {
+            it.copy(priority = newPriority)
+        }
+    }
+
     private fun createNewTask() = viewModelScope.launch {
-        taskRepository.createTask(uiState.value.title, uiState.value.description)
+        val taskId = taskRepository.createTask(uiState.value.title, uiState.value.description)
+        taskRepository.updateTask(taskId, uiState.value.title, uiState.value.description, uiState.value.priority)
         _uiState.update {
             it.copy(isTaskSaved = true)
         }
@@ -115,6 +127,7 @@ class AddEditTaskViewModel @Inject constructor(
                 taskId,
                 title = uiState.value.title,
                 description = uiState.value.description,
+                priority = uiState.value.priority
             )
             _uiState.update {
                 it.copy(isTaskSaved = true)
@@ -133,6 +146,7 @@ class AddEditTaskViewModel @Inject constructor(
                         it.copy(
                             title = task.title,
                             description = task.description,
+                            priority = task.priority,
                             isTaskCompleted = task.isCompleted,
                             isLoading = false
                         )

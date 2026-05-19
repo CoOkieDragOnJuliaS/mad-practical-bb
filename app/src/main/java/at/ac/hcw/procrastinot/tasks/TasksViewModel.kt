@@ -41,6 +41,8 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+import at.ac.hcw.procrastinot.data.TaskPriority
+
 /**
  * UiState for the task list screen.
  */
@@ -112,7 +114,15 @@ class TasksViewModel @Inject constructor(
     }
 
     fun completeTask(task: Task, completed: Boolean) = viewModelScope.launch {
-        showSnackbarMessage(R.string.not_implemented)
+        // === MAD-01.3: Update completeTask in TasksViewModel ===
+        // Aufruf der Repository-Methoden und Setzen der entsprechenden Snackbar-Message basierend auf dem Task-Status.
+        if (completed) {
+            taskRepository.completeTask(task.id)
+            showSnackbarMessage(R.string.task_marked_complete)
+        } else {
+            taskRepository.activateTask(task.id)
+            showSnackbarMessage(R.string.task_marked_active)
+        }
     }
 
     fun showEditResultMessage(result: Int) {
@@ -151,6 +161,16 @@ class TasksViewModel @Inject constructor(
                 COMPLETED_TASKS -> if (task.isCompleted) {
                     tasksToShow.add(task)
                 }
+                // === MAD-02.13: Filter logic for priority ===
+                TasksFilterType.HIGH_PRIORITY_TASKS -> if (task.priority == TaskPriority.HIGH) {
+                    tasksToShow.add(task)
+                }
+                TasksFilterType.MEDIUM_PRIORITY_TASKS -> if (task.priority == TaskPriority.MEDIUM) {
+                    tasksToShow.add(task)
+                }
+                TasksFilterType.LOW_PRIORITY_TASKS -> if (task.priority == TaskPriority.LOW) {
+                    tasksToShow.add(task)
+                }
             }
         }
         return tasksToShow
@@ -174,6 +194,24 @@ class TasksViewModel @Inject constructor(
                 FilteringUiInfo(
                     R.string.label_completed, R.string.no_tasks_completed,
                     R.drawable.ic_verified_user_96dp
+                )
+            }
+            TasksFilterType.HIGH_PRIORITY_TASKS -> {
+                FilteringUiInfo(
+                    R.string.label_high_priority, R.string.no_tasks_all,
+                    R.drawable.logo_no_fill
+                )
+            }
+            TasksFilterType.MEDIUM_PRIORITY_TASKS -> {
+                FilteringUiInfo(
+                    R.string.label_medium_priority, R.string.no_tasks_all,
+                    R.drawable.logo_no_fill
+                )
+            }
+            TasksFilterType.LOW_PRIORITY_TASKS -> {
+                FilteringUiInfo(
+                    R.string.label_low_priority, R.string.no_tasks_all,
+                    R.drawable.logo_no_fill
                 )
             }
         }

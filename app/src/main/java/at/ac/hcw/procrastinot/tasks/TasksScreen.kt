@@ -16,6 +16,9 @@
 
 package at.ac.hcw.procrastinot.tasks
 
+import androidx.compose.foundation.background
+import androidx.compose.ui.graphics.Color
+import at.ac.hcw.procrastinot.data.TaskPriority
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.compose.foundation.Image
@@ -80,11 +83,16 @@ fun TasksScreen(
         modifier = modifier.fillMaxSize(),
         snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
+            // === MAD-02.15: Update TasksScreen UI ===
+            // Filter Menü Parameter für Priority Filterung an die TopAppBar weitergeben
             TasksTopAppBar(
                 openDrawer = openDrawer,
                 onFilterAllTasks = { viewModel.setFiltering(ALL_TASKS) },
                 onFilterActiveTasks = { viewModel.setFiltering(ACTIVE_TASKS) },
                 onFilterCompletedTasks = { viewModel.setFiltering(COMPLETED_TASKS) },
+                onFilterHighPriorityTasks = { viewModel.setFiltering(TasksFilterType.HIGH_PRIORITY_TASKS) },
+                onFilterMediumPriorityTasks = { viewModel.setFiltering(TasksFilterType.MEDIUM_PRIORITY_TASKS) },
+                onFilterLowPriorityTasks = { viewModel.setFiltering(TasksFilterType.LOW_PRIORITY_TASKS) },
                 onClearCompletedTasks = { viewModel.clearCompletedTasks() },
                 onRefresh = { viewModel.refresh() }
             )
@@ -144,7 +152,7 @@ private fun TasksContent(
     LoadingContent(
         loading = loading,
         empty = tasks.isEmpty() && !loading,
-        emptyContent = { TasksEmptyContent(noTasksLabel, noTasksIconRes, modifier) },
+        emptyContent = { TasksEmptyContent(noTasksLabel, noTasksIconRes, currentFilteringLabel, modifier) },
         onRefresh = onRefresh
     ) {
         Column(
@@ -179,10 +187,20 @@ private fun TaskItem(
     onCheckedChange: (Boolean) -> Unit,
     onTaskClick: (Task) -> Unit
 ) {
+    // === MAD-02.17: Priority Background Color ===
+    // Farbe basierend auf Priorität ermitteln
+    val backgroundColor = when (task.priority) {
+        TaskPriority.HIGH -> Color(0xFFFFCDD2) // Red
+        TaskPriority.MEDIUM -> Color(0xFFFFE0B2) // Orange
+        TaskPriority.LOW -> Color(0xFFBBDEFB) // Blue
+        null -> Color.Transparent
+    }
+
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
             .fillMaxWidth()
+            .background(backgroundColor)
             .padding(
                 horizontal = dimensionResource(id = R.dimen.horizontal_margin),
                 vertical = dimensionResource(id = R.dimen.list_item_padding),
@@ -193,18 +211,24 @@ private fun TaskItem(
             checked = task.isCompleted,
             onCheckedChange = onCheckedChange
         )
-        Text(
-            text = task.titleForList,
-            style = MaterialTheme.typography.headlineSmall,
-            modifier = Modifier.padding(
-                start = dimensionResource(id = R.dimen.horizontal_margin)
-            ),
-            textDecoration = if (task.isCompleted) {
-                TextDecoration.LineThrough
-            } else {
-                null
+        Column(modifier = Modifier.padding(start = dimensionResource(id = R.dimen.horizontal_margin))) {
+            Text(
+                text = task.titleForList,
+                style = MaterialTheme.typography.headlineSmall,
+                textDecoration = if (task.isCompleted) {
+                    TextDecoration.LineThrough
+                } else {
+                    null
+                }
+            )
+            if (task.priority != null) {
+                Text(
+                    text = "Priority: ${task.priority.name.lowercase().replaceFirstChar { it.titlecase() }}",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             }
-        )
+        }
     }
 }
 
@@ -212,19 +236,36 @@ private fun TaskItem(
 private fun TasksEmptyContent(
     @StringRes noTasksLabel: Int,
     @DrawableRes noTasksIconRes: Int,
+    @StringRes currentFilteringLabel: Int,
     modifier: Modifier = Modifier
 ) {
+    // === MAD-02.19: Show filter title in empty state ===
+    // Layout so angepasst, dass oben der aktuelle Filter steht und darunter die Leermeldung
     Column(
-        modifier = modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
+        modifier = modifier
+            .fillMaxSize()
+            .padding(horizontal = dimensionResource(id = R.dimen.horizontal_margin))
     ) {
-        Image(
-            painter = painterResource(id = noTasksIconRes),
-            contentDescription = stringResource(R.string.no_tasks_image_content_description),
-            modifier = Modifier.size(96.dp)
+        Text(
+            text = stringResource(currentFilteringLabel),
+            modifier = Modifier.padding(
+                horizontal = dimensionResource(id = R.dimen.list_item_padding),
+                vertical = dimensionResource(id = R.dimen.vertical_margin)
+            ),
+            style = MaterialTheme.typography.headlineSmall
         )
-        Text(stringResource(id = noTasksLabel))
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Image(
+                painter = painterResource(id = noTasksIconRes),
+                contentDescription = stringResource(R.string.no_tasks_image_content_description),
+                modifier = Modifier.size(96.dp)
+            )
+            Text(stringResource(id = noTasksLabel))
+        }
     }
 }
 
@@ -304,7 +345,8 @@ private fun TasksEmptyContentPreview() {
         Surface {
             TasksEmptyContent(
                 noTasksLabel = R.string.no_tasks_all,
-                noTasksIconRes = R.drawable.logo_no_fill
+                noTasksIconRes = R.drawable.logo_no_fill,
+                currentFilteringLabel = R.string.label_all
             )
         }
     }
