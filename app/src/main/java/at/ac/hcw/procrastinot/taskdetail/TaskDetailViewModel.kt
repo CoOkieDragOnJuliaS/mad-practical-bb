@@ -98,7 +98,15 @@ class TaskDetailViewModel @Inject constructor(
     }
 
     fun setCompleted(completed: Boolean) = viewModelScope.launch {
-        showSnackbarMessage(R.string.not_implemented)
+        // === MAD-01.4: Update setCompleted in TaskDetailViewModel ===
+        // Aufruf der Repository-Methoden und Setzen der entsprechenden Snackbar-Message basierend auf dem Task-Status.
+        if (completed) {
+            taskRepository.completeTask(taskId)
+            showSnackbarMessage(R.string.task_marked_complete)
+        } else {
+            taskRepository.activateTask(taskId)
+            showSnackbarMessage(R.string.task_marked_active)
+        }
     }
 
     fun refresh() {

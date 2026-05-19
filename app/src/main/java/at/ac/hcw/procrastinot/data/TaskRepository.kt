@@ -39,6 +39,11 @@ interface TaskRepository {
 
     suspend fun updateTask(taskId: String, title: String, description: String)
 
+    // === MAD-01.1: Add complete/activate task to TaskRepository ===
+    // Interface Methoden hinzugefügt, um Tasks abzuschließen oder zu aktivieren.
+    suspend fun completeTask(taskId: String)
+    suspend fun activateTask(taskId: String)
+
     suspend fun clearCompletedTasks()
 
     suspend fun deleteAllTasks()

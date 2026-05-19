@@ -112,6 +112,18 @@ class DefaultTaskRepository @Inject constructor(
         return localDataSource.getById(taskId)?.toExternal()
     }
 
+    // === MAD-01.2: Implement complete/activate task in DefaultTaskRepository ===
+    // Implementierung der Methoden, um isCompleted via localDataSource zu aktualisieren und ins Netzwerk zu synchronisieren.
+    override suspend fun completeTask(taskId: String) {
+        localDataSource.updateCompleted(taskId, true)
+        saveTasksToNetwork()
+    }
+
+    override suspend fun activateTask(taskId: String) {
+        localDataSource.updateCompleted(taskId, false)
+        saveTasksToNetwork()
+    }
+
     override suspend fun clearCompletedTasks() {
         localDataSource.deleteCompleted()
         saveTasksToNetwork()
