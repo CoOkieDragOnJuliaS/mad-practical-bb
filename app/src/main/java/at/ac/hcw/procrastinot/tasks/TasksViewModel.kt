@@ -130,6 +130,13 @@ class TasksViewModel @Inject constructor(
         showSnackbarMessage(R.string.not_implemented)
     }
 
+    // === MAD-07.01: Funktion zum Löschen eines Tasks hinzugefügt ===
+    // Diese Funktion löscht den Task aus dem Repository und zeigt eine Bestätigung in der Snackbar an.
+    fun deleteTask(task: Task) = viewModelScope.launch {
+        taskRepository.deleteTask(task.id)
+        showSnackbarMessage(R.string.successfully_deleted_task_message)
+    }
+
     fun showEditResultMessage(result: Int) {
         when (result) {
             EDIT_RESULT_OK -> showSnackbarMessage(R.string.successfully_saved_task_message)
