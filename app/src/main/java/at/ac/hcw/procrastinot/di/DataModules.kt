@@ -77,7 +77,7 @@ object DatabaseModule {
             "Tasks.db"
         )
         .addMigrations(MIGRATION_1_2)
-        ).addCallback(object : RoomDatabase.Callback() {
+        .addCallback(object : RoomDatabase.Callback() {
             override fun onCreate(db: SupportSQLiteDatabase) {
                 super.onCreate(db)
                 // === MAD-04.01: Datenbank-Seeding beim ersten Start ===
