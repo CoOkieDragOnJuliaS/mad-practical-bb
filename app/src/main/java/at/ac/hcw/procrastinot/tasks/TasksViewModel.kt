@@ -23,6 +23,7 @@ import at.ac.hcw.procrastinot.ADD_EDIT_RESULT_OK
 import at.ac.hcw.procrastinot.DELETE_RESULT_OK
 import at.ac.hcw.procrastinot.EDIT_RESULT_OK
 import at.ac.hcw.procrastinot.R
+import at.ac.hcw.procrastinot.TodoDestinationsArgs.USER_MESSAGE_ARG
 import at.ac.hcw.procrastinot.data.Task
 import at.ac.hcw.procrastinot.data.TaskRepository
 import at.ac.hcw.procrastinot.tasks.TasksFilterType.ACTIVE_TASKS
@@ -72,6 +73,20 @@ class TasksViewModel @Inject constructor(
         }
             .map { Async.Success(it) }
             .catch<Async<List<Task>>> { emit(Async.Error(R.string.loading_tasks_error)) }
+
+    init {
+        // === MAD-06.01: Verarbeite initiale Nachricht aus den Navigations-Argumenten einmalig ===
+        // Wir prüfen, ob ein Result-Code (z.B. ADD_EDIT_RESULT_OK) in den Navigations-Argumenten
+        // vorhanden ist. Falls ja, zeigen wir die entsprechende Snackbar-Nachricht an.
+        // Wir setzen den Wert danach im SavedStateHandle auf 0, damit die Nachricht beim
+        // Navigieren zurück von anderen Screens (wie Statistik) nicht erneut erscheint.
+        savedStateHandle.get<Int>(USER_MESSAGE_ARG)?.let { message ->
+            if (message != 0) {
+                showEditResultMessage(message)
+                savedStateHandle[USER_MESSAGE_ARG] = 0
+            }
+        }
+    }
 
     val uiState: StateFlow<TasksUiState> = combine(
         _filterUiInfo, _isLoading, _userMessage, _filteredTasksAsync
