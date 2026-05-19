@@ -18,6 +18,8 @@ package at.ac.hcw.procrastinot.di
 
 import android.content.Context
 import androidx.room.Room
+import androidx.room.migration.Migration
+import androidx.sqlite.db.SupportSQLiteDatabase
 import at.ac.hcw.procrastinot.data.DefaultTaskRepository
 import at.ac.hcw.procrastinot.data.TaskRepository
 import at.ac.hcw.procrastinot.data.source.local.TaskDao
@@ -50,6 +52,14 @@ abstract class DataSourceModule {
     abstract fun bindNetworkDataSource(dataSource: TaskNetworkDataSource): NetworkDataSource
 }
 
+val MIGRATION_1_2 = object : Migration(1, 2) {
+    // === MAD-02.6: Database migration object ===
+    // Migration von V1 zu V2 hinzufügen und in der DatabaseBuilder registrieren, um Abstürze bei bestehenden User-Daten zu vermeiden
+    override fun migrate(database: SupportSQLiteDatabase) {
+        database.execSQL("ALTER TABLE task ADD COLUMN priority INTEGER DEFAULT NULL")
+    }
+}
+
 @Module
 @InstallIn(SingletonComponent::class)
 object DatabaseModule {
@@ -61,7 +71,9 @@ object DatabaseModule {
             context.applicationContext,
             ToDoDatabase::class.java,
             "Tasks.db"
-        ).build()
+        )
+        .addMigrations(MIGRATION_1_2)
+        .build()
     }
 
     @Provides

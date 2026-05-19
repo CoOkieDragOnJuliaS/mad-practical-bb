@@ -57,6 +57,13 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import at.ac.hcw.procrastinot.R
 import at.ac.hcw.procrastinot.util.AddEditTaskTopAppBar
 
+import at.ac.hcw.procrastinot.data.TaskPriority
+import androidx.compose.foundation.layout.Row
+import androidx.compose.material3.RadioButton
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.width
+import androidx.compose.ui.Alignment
+
 @Composable
 fun AddEditTaskScreen(
     @StringRes topBarTitle: Int,
@@ -82,8 +89,10 @@ fun AddEditTaskScreen(
             loading = uiState.isLoading,
             title = uiState.title,
             description = uiState.description,
+            priority = uiState.priority,
             onTitleChanged = viewModel::updateTitle,
             onDescriptionChanged = viewModel::updateDescription,
+            onPriorityChanged = viewModel::updatePriority,
             modifier = Modifier.padding(paddingValues)
         )
 
@@ -110,8 +119,10 @@ private fun AddEditTaskContent(
     loading: Boolean,
     title: String,
     description: String,
+    priority: TaskPriority?,
     onTitleChanged: (String) -> Unit,
     onDescriptionChanged: (String) -> Unit,
+    onPriorityChanged: (TaskPriority?) -> Unit,
     modifier: Modifier = Modifier
 ) {
     var isRefreshing by remember { mutableStateOf(false) }
@@ -150,6 +161,27 @@ private fun AddEditTaskContent(
                 maxLines = 1,
                 colors = textFieldColors
             )
+            
+            // === MAD-02.10: Priority selection UI ===
+            // Auswahl der Priorität über Radiobuttons
+            Text(
+                text = "Priority",
+                style = MaterialTheme.typography.titleMedium,
+                modifier = Modifier.padding(top = 16.dp, bottom = 8.dp)
+            )
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                TaskPriority.values().forEach { prio ->
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        RadioButton(
+                            selected = (priority == prio),
+                            onClick = { onPriorityChanged(prio) }
+                        )
+                        Text(text = prio.name)
+                        Spacer(modifier = Modifier.width(8.dp))
+                    }
+                }
+            }
+
             OutlinedTextField(
                 value = description,
                 onValueChange = onDescriptionChanged,

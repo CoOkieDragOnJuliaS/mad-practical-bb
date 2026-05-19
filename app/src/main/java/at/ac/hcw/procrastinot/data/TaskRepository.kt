@@ -37,7 +37,9 @@ interface TaskRepository {
 
     suspend fun createTask(title: String, description: String): String
 
-    suspend fun updateTask(taskId: String, title: String, description: String)
+    // === MAD-02.8: Update TaskRepository with priority ===
+    // Parameter `priority: TaskPriority?` zu updateTask hinzugefügt
+    suspend fun updateTask(taskId: String, title: String, description: String, priority: TaskPriority? = null)
 
     // === MAD-01.1: Add complete/activate task to TaskRepository ===
     // Interface Methoden hinzugefügt, um Tasks abzuschließen oder zu aktivieren.

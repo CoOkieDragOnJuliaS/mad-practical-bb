@@ -31,6 +31,9 @@ data class Task(
     val title: String = "",
     val description: String = "",
     val isCompleted: Boolean = false,
+    // === MAD-02.2: Add priority to Task domain model ===
+    // Hinzufügen der TaskPriority zur Domain Klasse, damit die Priorität für jeden Task gespeichert und angezeigt werden kann.
+    val priority: TaskPriority? = null,
     val id: String,
 ) {
 

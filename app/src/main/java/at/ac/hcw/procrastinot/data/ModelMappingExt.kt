@@ -34,12 +34,16 @@ import at.ac.hcw.procrastinot.data.source.network.TaskStatus
  *
  */
 
+// === MAD-02.4: Update Model Mapping ===
+// Mappings aktualisiert, um priority zwischen Task, LocalTask und NetworkTask zu überführen.
+
 // External to local
 fun Task.toLocal() = LocalTask(
     id = id,
     title = title,
     description = description,
     isCompleted = isCompleted,
+    priority = priority?.ordinal
 )
 
 fun List<Task>.toLocal() = map(Task::toLocal)
@@ -50,6 +54,7 @@ fun LocalTask.toExternal() = Task(
     title = title,
     description = description,
     isCompleted = isCompleted,
+    priority = priority?.let { TaskPriority.values().getOrNull(it) }
 )
 
 // Note: JvmName is used to provide a unique name for each extension function with the same name.
@@ -64,6 +69,7 @@ fun NetworkTask.toLocal() = LocalTask(
     title = title,
     description = shortDescription,
     isCompleted = (status == TaskStatus.COMPLETE),
+    priority = priority
 )
 
 @JvmName("networkToLocal")
@@ -74,7 +80,8 @@ fun LocalTask.toNetwork() = NetworkTask(
     id = id,
     title = title,
     shortDescription = description,
-    status = if (isCompleted) { TaskStatus.COMPLETE } else { TaskStatus.ACTIVE }
+    status = if (isCompleted) { TaskStatus.COMPLETE } else { TaskStatus.ACTIVE },
+    priority = priority
 )
 
 fun List<LocalTask>.toNetwork() = map(LocalTask::toNetwork)
