@@ -32,6 +32,7 @@ import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Surface
@@ -112,6 +113,10 @@ private fun FilterTasksMenu(
         DropdownMenuItem(onClick = { onFilterCompletedTasks(); closeMenu() },
             text = { Text(text = stringResource(id = R.string.nav_completed)) }
         )
+        // === MAD-02.20: Trennung der Filter-Kategorien ===
+        // Ein HorizontalDivider wird eingefügt, um die allgemeinen Filter (All, Active, Completed)
+        // visuell von den Prioritäts-Filtern (High, Medium, Low) zu trennen, wie im Design vorgegeben.
+        HorizontalDivider()
         DropdownMenuItem(onClick = { onFilterHighPriorityTasks(); closeMenu() },
             text = { Text(text = stringResource(id = R.string.nav_high_priority)) }
         )
