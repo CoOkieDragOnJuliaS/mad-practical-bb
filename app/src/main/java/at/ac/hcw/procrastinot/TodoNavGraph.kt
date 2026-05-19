@@ -67,11 +67,11 @@ fun TodoNavGraph(
             arguments = listOf(
                 navArgument(USER_MESSAGE_ARG) { type = NavType.IntType; defaultValue = 0 }
             )
-        ) { entry ->
+        ) { _ ->
             AppModalDrawer(drawerState, currentRoute, navActions) {
+                // === MAD-06.03: TasksScreen benötigt userMessage nicht mehr als Parameter ===
+                // Die Nachricht wird jetzt direkt im TasksViewModel über das SavedStateHandle verarbeitet.
                 TasksScreen(
-                    userMessage = entry.arguments?.getInt(USER_MESSAGE_ARG)!!,
-                    onUserMessageDisplayed = { entry.arguments?.putInt(USER_MESSAGE_ARG, 0) },
                     onAddTask = { navActions.navigateToAddEditTask(R.string.add_task, null) },
                     onTaskClick = { task -> navActions.navigateToTaskDetail(task.id) },
                     openDrawer = { coroutineScope.launch { drawerState.open() } }
