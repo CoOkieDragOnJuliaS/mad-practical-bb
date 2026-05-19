@@ -16,6 +16,7 @@
 
 package at.ac.hcw.procrastinot.util
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -44,7 +45,12 @@ fun LoadingContent(
     content: @Composable () -> Unit
 ) {
     if (empty) {
-        emptyContent()
+        // === MAD-03.03: Korrekte Anwendung des Modifiers ===
+        // Wir wickeln den emptyContent in eine Box, damit der modifier (z.B. Padding von TopAppBar)
+        // auch im leeren Zustand angewendet wird.
+        Box(modifier = modifier) {
+            emptyContent()
+        }
     } else {
         SwipeRefresh(
             state = rememberSwipeRefreshState(loading),

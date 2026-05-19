@@ -69,16 +69,22 @@ class StatisticsViewModel @Inject constructor(
     private fun produceStatisticsUiState(taskLoad: Async<List<Task>?>) =
         when (taskLoad) {
             Async.Loading -> {
-                StatisticsUiState(isLoading = true, isEmpty = true)
+                // === MAD-03.04: Lade-Logik korrigiert ===
+                // Während des Ladens setzen wir isEmpty auf false, damit der Lade-Spinner
+                // über dem (noch leeren) Inhalt angezeigt wird, statt sofort den "No Tasks" Text.
+                StatisticsUiState(isLoading = true, isEmpty = false)
             }
             is Async.Error -> {
                 // TODO: Show error message?
                 StatisticsUiState(isEmpty = true, isLoading = false)
             }
             is Async.Success -> {
+                // === MAD-03.02: Sicherer Umgang mit Daten ===
+                // Wir nutzen getActiveAndCompletedStats, welches nun sicher mit leeren Listen umgeht.
+                // Zusätzlich prüfen wir auf null, bevor wir .isEmpty() aufrufen, um NullPointer zu vermeiden.
                 val stats = getActiveAndCompletedStats(taskLoad.data)
                 StatisticsUiState(
-                    isEmpty = taskLoad.data!!.isEmpty(),
+                    isEmpty = taskLoad.data?.isEmpty() ?: true,
                     activeTasksPercent = stats.activeTasksPercent,
                     completedTasksPercent = stats.completedTasksPercent,
                     isLoading = false
